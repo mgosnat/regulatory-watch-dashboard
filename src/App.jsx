@@ -2,50 +2,50 @@ import { useState, useEffect } from "react";
 
 const SAMPLE_ITEMS = [
   {
-    titre: "Note d'information ANSM â€” IA en dispositifs mÃ©dicaux",
+    titre: "Note d'information ANSM Ã¢â‚¬â€ IA en dispositifs mÃƒÂ©dicaux",
     niveau: "critique",
     domaine: "ANSM",
     date: "2025-03-10",
-    resume: "L'ANSM publie une note encadrant l'utilisation des systÃ¨mes d'IA dans les dispositifs mÃ©dicaux de classe IIb et III. Les fabricants doivent dÃ©montrer la robustesse et la traÃ§abilitÃ© de leurs algorithmes avant mise sur le marchÃ©.",
-    impact_metier: "Obligation de documenter les donnÃ©es d'entraÃ®nement, les mÃ©triques de performance et les protocoles de surveillance post-marchÃ© pour tout DM intÃ©grant de l'IA.",
+    resume: "L'ANSM publie une note encadrant l'utilisation des systÃƒÂ¨mes d'IA dans les dispositifs mÃƒÂ©dicaux de classe IIb et III. Les fabricants doivent dÃƒÂ©montrer la robustesse et la traÃƒÂ§abilitÃƒÂ© de leurs algorithmes avant mise sur le marchÃƒÂ©.",
+    impact_metier: "Obligation de documenter les donnÃƒÂ©es d'entraÃƒÂ®nement, les mÃƒÂ©triques de performance et les protocoles de surveillance post-marchÃƒÂ© pour tout DM intÃƒÂ©grant de l'IA.",
     echeances: ["30/06/2025"],
     actions_requises: [
-      "Auditer les DM existants intÃ©grant de l'IA",
-      "PrÃ©parer un dossier technique conforme Ã  la note",
-      "DÃ©signer un responsable de la surveillance algorithmique",
+      "Auditer les DM existants intÃƒÂ©grant de l'IA",
+      "PrÃƒÂ©parer un dossier technique conforme ÃƒÂ  la note",
+      "DÃƒÂ©signer un responsable de la surveillance algorithmique",
     ],
-    mots_cles: ["dispositif mÃ©dical", "IA", "conformitÃ©", "traÃ§abilitÃ©"],
+    mots_cles: ["dispositif mÃƒÂ©dical", "IA", "conformitÃƒÂ©", "traÃƒÂ§abilitÃƒÂ©"],
     pertinence_ia: true,
     pertinence_eu_ai_act: true,
   },
   {
-    titre: "EMA â€” RÃ©vision du guideline ICH E6(R3) sur les Bonnes Pratiques Cliniques",
+    titre: "EMA Ã¢â‚¬â€ RÃƒÂ©vision du guideline ICH E6(R3) sur les Bonnes Pratiques Cliniques",
     niveau: "important",
     domaine: "EMA",
     date: "2025-03-08",
-    resume: "L'EMA finalise la rÃ©vision ICH E6(R3) introduisant une approche basÃ©e sur le risque pour la conduite des essais cliniques. Les sponsors doivent adapter leurs systÃ¨mes de gestion qualitÃ© en consÃ©quence.",
-    impact_metier: "Refonte des plans de monitoring, introduction des donnÃ©es sources Ã©lectroniques et nouvelles exigences pour les essais dÃ©centralisÃ©s.",
+    resume: "L'EMA finalise la rÃƒÂ©vision ICH E6(R3) introduisant une approche basÃƒÂ©e sur le risque pour la conduite des essais cliniques. Les sponsors doivent adapter leurs systÃƒÂ¨mes de gestion qualitÃƒÂ© en consÃƒÂ©quence.",
+    impact_metier: "Refonte des plans de monitoring, introduction des donnÃƒÂ©es sources ÃƒÂ©lectroniques et nouvelles exigences pour les essais dÃƒÂ©centralisÃƒÂ©s.",
     echeances: ["01/01/2026"],
     actions_requises: [
-      "Mettre Ã  jour les SOPs de monitoring",
-      "Former les Ã©quipes aux exigences DCT",
-      "RÃ©viser les contrats avec les CROs",
+      "Mettre ÃƒÂ  jour les SOPs de monitoring",
+      "Former les ÃƒÂ©quipes aux exigences DCT",
+      "RÃƒÂ©viser les contrats avec les CROs",
     ],
     mots_cles: ["BPC", "essais cliniques", "ICH E6", "monitoring"],
     pertinence_ia: false,
     pertinence_eu_ai_act: false,
   },
   {
-    titre: "arXiv â€” LLM-assisted ADMET prediction outperforms classical ML on DILI endpoint",
+    titre: "arXiv Ã¢â‚¬â€ LLM-assisted ADMET prediction outperforms classical ML on DILI endpoint",
     niveau: "info",
     domaine: "arXiv",
     date: "2025-03-07",
-    resume: "Ã‰tude comparative montrant que les modÃ¨les LLM fine-tunÃ©s surpassent les approches classiques ML pour prÃ©dire la toxicitÃ© hÃ©patique (DILI) avec une AUC de 0.91 sur le benchmark DILIrank.",
-    impact_metier: "OpportunitÃ© d'intÃ©grer des modÃ¨les prÃ©-entraÃ®nÃ©s dans les workflows de screening prÃ©coce pour rÃ©duire les coÃ»ts de dÃ©couverte.",
+    resume: "Ãƒâ€°tude comparative montrant que les modÃƒÂ¨les LLM fine-tunÃƒÂ©s surpassent les approches classiques ML pour prÃƒÂ©dire la toxicitÃƒÂ© hÃƒÂ©patique (DILI) avec une AUC de 0.91 sur le benchmark DILIrank.",
+    impact_metier: "OpportunitÃƒÂ© d'intÃƒÂ©grer des modÃƒÂ¨les prÃƒÂ©-entraÃƒÂ®nÃƒÂ©s dans les workflows de screening prÃƒÂ©coce pour rÃƒÂ©duire les coÃƒÂ»ts de dÃƒÂ©couverte.",
     echeances: [],
     actions_requises: [
-      "Ã‰valuer la reproductibilitÃ© sur pipeline interne",
-      "Consulter l'Ã©quipe data science",
+      "Ãƒâ€°valuer la reproductibilitÃƒÂ© sur pipeline interne",
+      "Consulter l'ÃƒÂ©quipe data science",
     ],
     mots_cles: ["ADMET", "LLM", "DILI", "drug discovery"],
     pertinence_ia: true,
@@ -87,15 +87,15 @@ function Card({ item, animate }) {
         <NiveauBadge niveau={item.niveau} />
       </div>
       <p style={{ fontSize:12, color:"var(--color-text-secondary)", marginBottom:10 }}>
-        {item.domaine} Â· {item.date}
-        {item.echeances?.length > 0 && ` Â· Ã‰chÃ©ance : ${item.echeances[0]}`}
+        {item.domaine} Ã‚Â· {item.date}
+        {item.echeances?.length > 0 && ` Ã‚Â· Ãƒâ€°chÃƒÂ©ance : ${item.echeances[0]}`}
         {item.pertinence_ia && <span style={{marginLeft:6,fontSize:10,padding:"1px 6px",borderRadius:4,background:"#ede9fe",color:"#6d28d9",fontWeight:600}}>IA</span>}
         {item.pertinence_eu_ai_act && <span style={{marginLeft:4,fontSize:10,padding:"1px 6px",borderRadius:4,background:"#d1fae5",color:"#065f46",fontWeight:600}}>EU AI Act</span>}
       </p>
       <p style={{ fontSize:13, lineHeight:1.65, color:"var(--color-text-secondary)", marginBottom:10 }}>{item.resume}</p>
       {open && <>
         <div style={{fontSize:12,background:"var(--color-background-secondary)",borderRadius:6,padding:"8px 12px",marginBottom:10,color:"var(--color-text-secondary)"}}>
-          ðŸ’¼ {item.impact_metier}
+          Ã°Å¸â€™Â¼ {item.impact_metier}
         </div>
         {item.actions_requises?.length > 0 && (
           <ul style={{paddingLeft:18,marginBottom:10}}>
@@ -113,7 +113,7 @@ function Card({ item, animate }) {
         </div>
         <button onClick={()=>setOpen(!open)} style={{
           fontSize:11,color:"var(--color-text-secondary)",background:"none",border:"none",cursor:"pointer",padding:"2px 8px",
-        }}>{open ? "RÃ©duire â–²" : "DÃ©tails â–¼"}</button>
+        }}>{open ? "RÃƒÂ©duire Ã¢â€“Â²" : "DÃƒÂ©tails Ã¢â€“Â¼"}</button>
       </div>
     </div>
   );
@@ -137,9 +137,9 @@ function SummaryBar({ items }) {
   );
 }
 
-const PLACEHOLDER = `Colle ici un extrait rÃ©glementaire Ã  analyserâ€¦
+const PLACEHOLDER = `Colle ici un extrait rÃƒÂ©glementaire ÃƒÂ  analyserÃ¢â‚¬Â¦
 
-Exemple : titre de la publication, source, et contenu rÃ©sumÃ©.`;
+Exemple : titre de la publication, source, et contenu rÃƒÂ©sumÃƒÂ©.`;
 
 export default function App() {
   const [items, setItems] = useState(SAMPLE_ITEMS);
@@ -160,15 +160,15 @@ export default function App() {
     setLoading(true);
     setError("");
 
-    const prompt = `Tu es un expert en affaires rÃ©glementaires pharmaceutiques et biomÃ©dicales.
-Analyse ce document et rÃ©ponds UNIQUEMENT avec un objet JSON valide (sans Markdown).
+    const prompt = `Tu es un expert en affaires rÃƒÂ©glementaires pharmaceutiques et biomÃƒÂ©dicales.
+Analyse ce document et rÃƒÂ©ponds UNIQUEMENT avec un objet JSON valide (sans Markdown).
 
 Structure requise :
 {
   "titre": "titre court",
   "niveau": "critique" | "important" | "info",
   "domaine": "ANSM" | "DGS" | "EMA" | "CNAM" | "arXiv" | "autre",
-  "resume": "3-4 phrases synthÃ©tisant le contenu",
+  "resume": "3-4 phrases synthÃƒÂ©tisant le contenu",
   "impact_metier": "impact concret sur les professionnels pharma",
   "echeances": [],
   "actions_requises": [],
@@ -202,7 +202,7 @@ ${text.slice(0, 3000)}`;
       setText("");
       setTab("veille");
     } catch (e) {
-      setError("Erreur d'analyse : " + (e.message || "rÃ©ponse inattendue"));
+      setError("Erreur d'analyse : " + (e.message || "rÃƒÂ©ponse inattendue"));
     } finally {
       setLoading(false);
     }
@@ -217,16 +217,16 @@ ${text.slice(0, 3000)}`;
       <div style={{background:"#0f172a",color:"#fff",borderRadius:12,padding:"20px 24px",marginBottom:18}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
-            <div style={{fontSize:17,fontWeight:700,marginBottom:2}}>Veille RÃ©glementaire</div>
-            <div style={{fontSize:12,opacity:.6}}>Pharma Â· Biotech Â· Dispositifs mÃ©dicaux</div>
+            <div style={{fontSize:17,fontWeight:700,marginBottom:2}}>Veille RÃƒÂ©glementaire</div>
+            <div style={{fontSize:12,opacity:.6}}>Pharma Ã‚Â· Biotech Ã‚Â· Dispositifs mÃƒÂ©dicaux</div>
           </div>
-          <div style={{fontSize:11,opacity:.5}}>demo Â· Claude API</div>
+          <div style={{fontSize:11,opacity:.5}}>demo Ã‚Â· Claude API</div>
         </div>
       </div>
 
       {/* Tabs */}
       <div style={{display:"flex",gap:4,marginBottom:18,borderBottom:"1px solid var(--color-border-tertiary)",paddingBottom:0}}>
-        {[["veille","ðŸ“‹ Tableau de bord"],["analyze","ðŸ” Analyser un document"]].map(([k,l])=>(
+        {[["veille","Ã°Å¸â€œâ€¹ Tableau de bord"],["analyze","Ã°Å¸â€Â Analyser un document"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)} style={{
             fontSize:13,padding:"8px 16px",border:"none",cursor:"pointer",borderRadius:"6px 6px 0 0",
             background: tab===k ? "var(--color-background-primary)" : "transparent",
@@ -260,7 +260,7 @@ ${text.slice(0, 3000)}`;
       {tab === "analyze" && (
         <div>
           <p style={{fontSize:13,color:"var(--color-text-secondary)",marginBottom:14}}>
-            Colle n'importe quel extrait rÃ©glementaire (ANSM, EMA, arXivâ€¦) pour obtenir une classification et synthÃ¨se automatique.
+            Colle n'importe quel extrait rÃƒÂ©glementaire (ANSM, EMA, arXivÃ¢â‚¬Â¦) pour obtenir une classification et synthÃƒÂ¨se automatique.
           </p>
           <textarea
             value={text} onChange={e=>setText(e.target.value)}
@@ -280,7 +280,7 @@ ${text.slice(0, 3000)}`;
               color: loading||!text.trim() ? "var(--color-text-secondary)" : "#fff",
               fontSize:13, fontWeight:600, transition:"background .2s",
             }}>
-              {loading ? "Analyse en coursâ€¦" : "Analyser avec Claude"}
+              {loading ? "Analyse en coursÃ¢â‚¬Â¦" : "Analyser avec Claude"}
             </button>
           </div>
         </div>
