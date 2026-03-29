@@ -55,26 +55,123 @@ function SummaryBar({ items }) {
 }
 
 function FilterBar({ active, onChange, items }) {
-  const counts = { all: items.length, critique: 0, important: 0, info: 0 };
-  items.forEach(i => { if (counts[i.niveau] !== undefined) counts[i.niveau]++; });
-  const filters = [
-    { key: "all",      label: "Tous",      color: "#0f172a", bg: "#f1f5f9", border: "#e2e8f0" },
-    { key: "critique", label: "Critique",  color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
-    { key: "important",label: "Important", color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
-    { key: "info",     label: "Info",      color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+  const counts={all:items.length,critique:0,important:0,info:0};
+  items.forEach(i=>{if(counts[i.niveau]!==undefined)counts[i.niveau]++;});
+  const filters=[
+    {key:"all",label:"Tous",color:"#0f172a",bg:"#f1f5f9",border:"#e2e8f0"},
+    {key:"critique",label:"Critique",color:"#dc2626",bg:"#fef2f2",border:"#fecaca"},
+    {key:"important",label:"Important",color:"#d97706",bg:"#fffbeb",border:"#fde68a"},
+    {key:"info",label:"Info",color:"#2563eb",bg:"#eff6ff",border:"#bfdbfe"},
   ];
-  return (
+  return(
     <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
       {filters.map(f=>(
-        <button key={f.key} onClick={()=>onChange(f.key)} style={{
-          padding:"6px 16px", borderRadius:20, border:`1.5px solid ${active===f.key ? f.color : f.border}`,
-          background: active===f.key ? f.color : f.bg,
-          color: active===f.key ? "#fff" : f.color,
-          fontSize:12, fontWeight:600, cursor:"pointer", transition:"all .15s",
-        }}>
+        <button key={f.key} onClick={()=>onChange(f.key)} style={{padding:"6px 16px",borderRadius:20,border:`1.5px solid ${active===f.key?f.color:f.border}`,background:active===f.key?f.color:f.bg,color:active===f.key?"#fff":f.color,fontSize:12,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>
           {f.label} ({counts[f.key]})
         </button>
       ))}
+    </div>
+  );
+}
+
+function QAPanel({ allItems }) {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading]   = useState(false);
+
+  const SUGGESTED = [
+    "Quelles sont les alertes critiques de la semaine ?",
+    "Que dit la FDA sur l'IA en dispositifs medicaux ?",
+    "Quelles echeances dois-je surveiller ?",
+    "Quels articles concernent l'EU AI Act ?",
+  ];
+
+  async function ask(q) {
+    const userQ = q || question;
+    if (!userQ.trim()) return;
+    setMessages(prev => [...prev, { role: "user", text: userQ }]);
+    setQuestion("");
+    setLoading(true);
+
+    const context = allItems.slice(0, 20).map(i =>
+      `[${i.niveau?.toUpperCase()}] ${i.titre||i.title} (${i.domaine||i.source}, ${i.date})\nResume: ${i.resume}\nImpact: ${i.impact_metier||i.impact||""}\nEcheances: ${(i.echeances||[]).join(", ")||"aucune"}`
+    ).join("\n\n");
+
+    const prompt = `Tu es un expert en affaires reglementaires pharmaceutiques et biotech. Tu as acces aux 20 articles de veille reglementaire les plus recents ci-dessous. Reponds a la question de l'utilisateur de facon precise et concise en citant les sources pertinentes (titre + source). Si aucun article ne repond a la question, dis-le clairement.
+
+ARTICLES DE VEILLE :
+${context}
+
+QUESTION : ${userQ}`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 800,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await res.json();
+      const answer = data.content?.[0]?.text?.trim() || "Pas de reponse.";
+      setMessages(prev => [...prev, { role: "assistant", text: answer }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "assistant", text: "Erreur de connexion." }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <p style={{fontSize:13,color:"#64748b",marginBottom:16}}>Posez une question sur la veille reglementaire — Claude repond en s'appuyant sur les articles analyses.</p>
+
+      {messages.length === 0 && (
+        <div style={{marginBottom:20}}>
+          <p style={{fontSize:11,color:"#94a3b8",marginBottom:10,textTransform:"uppercase",letterSpacing:".05em"}}>Questions suggeries</p>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {SUGGESTED.map((s,i) => (
+              <button key={i} onClick={()=>ask(s)} style={{textAlign:"left",padding:"10px 14px",borderRadius:8,border:"1px solid #e2e8f0",background:"#f8fafc",color:"#0f172a",fontSize:13,cursor:"pointer"}}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:16}}>
+        {messages.map((m,i) => (
+          <div key={i} style={{
+            padding:"12px 16px",borderRadius:10,fontSize:13,lineHeight:1.65,
+            background: m.role==="user" ? "#0f172a" : "#f8fafc",
+            color: m.role==="user" ? "#fff" : "#0f172a",
+            alignSelf: m.role==="user" ? "flex-end" : "flex-start",
+            maxWidth:"90%",
+          }}>
+            {m.text}
+          </div>
+        ))}
+        {loading && (
+          <div style={{padding:"12px 16px",borderRadius:10,fontSize:13,background:"#f8fafc",color:"#94a3b8",alignSelf:"flex-start"}}>
+            Analyse en cours...
+          </div>
+        )}
+      </div>
+
+      <div style={{display:"flex",gap:8}}>
+        <input
+          value={question}
+          onChange={e=>setQuestion(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&ask()}
+          placeholder="Ex: Quelles alertes FDA cette semaine ?"
+          style={{flex:1,fontSize:13,padding:"10px 14px",borderRadius:8,border:"1px solid #e2e8f0",background:"#fff",color:"#0f172a",fontFamily:"inherit"}}
+        />
+        <button onClick={()=>ask()} disabled={loading||!question.trim()} style={{padding:"10px 20px",borderRadius:8,border:"none",cursor:loading||!question.trim()?"not-allowed":"pointer",background:loading||!question.trim()?"#e2e8f0":"#2563eb",color:loading||!question.trim()?"#94a3b8":"#fff",fontSize:13,fontWeight:600}}>
+          Envoyer
+        </button>
+      </div>
     </div>
   );
 }
@@ -95,7 +192,7 @@ export default function App() {
       .catch(()=>{});
   },[]);
 
-  const items = filter === "all" ? allItems : allItems.filter(i => i.niveau === filter);
+  const items = filter==="all" ? allItems : allItems.filter(i=>i.niveau===filter);
 
   async function analyze() {
     if(!text.trim())return;
@@ -130,7 +227,7 @@ export default function App() {
       </div>
 
       <div style={{display:"flex",gap:4,marginBottom:18,borderBottom:"1px solid #e2e8f0"}}>
-        {[["veille","Tableau de bord"],["analyze","Analyser un document"]].map(([k,l])=>(
+        {[["veille","Tableau de bord"],["analyze","Analyser un document"],["qa","Questions & Reponses"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)} style={{fontSize:13,padding:"8px 16px",border:"none",cursor:"pointer",borderRadius:"6px 6px 0 0",background:tab===k?"#fff":"transparent",color:tab===k?"#0f172a":"#64748b",fontWeight:tab===k?600:400,borderBottom:tab===k?"2px solid #2563eb":"2px solid transparent",marginBottom:-1}}>{l}</button>
         ))}
       </div>
@@ -162,6 +259,8 @@ export default function App() {
           </button>
         </div>
       </div>}
+
+      {tab==="qa"&&<QAPanel allItems={allItems}/>}
     </div>
   );
 }
