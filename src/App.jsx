@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 
-const SAMPLE_ITEMS = [];
-
 const NIVEAU_META = {
   critique:  { color: "#dc2626", bg: "#fef2f2", border: "#fecaca", label: "Critique"  },
   important: { color: "#d97706", bg: "#fffbeb", border: "#fde68a", label: "Important" },
@@ -56,22 +54,50 @@ function SummaryBar({ items }) {
   );
 }
 
+function FilterBar({ active, onChange, items }) {
+  const counts = { all: items.length, critique: 0, important: 0, info: 0 };
+  items.forEach(i => { if (counts[i.niveau] !== undefined) counts[i.niveau]++; });
+  const filters = [
+    { key: "all",      label: "Tous",      color: "#0f172a", bg: "#f1f5f9", border: "#e2e8f0" },
+    { key: "critique", label: "Critique",  color: "#dc2626", bg: "#fef2f2", border: "#fecaca" },
+    { key: "important",label: "Important", color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+    { key: "info",     label: "Info",      color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+  ];
+  return (
+    <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+      {filters.map(f=>(
+        <button key={f.key} onClick={()=>onChange(f.key)} style={{
+          padding:"6px 16px", borderRadius:20, border:`1.5px solid ${active===f.key ? f.color : f.border}`,
+          background: active===f.key ? f.color : f.bg,
+          color: active===f.key ? "#fff" : f.color,
+          fontSize:12, fontWeight:600, cursor:"pointer", transition:"all .15s",
+        }}>
+          {f.label} ({counts[f.key]})
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function App() {
-  const [items,setItems]=useState(SAMPLE_ITEMS);
-  const [text,setText]=useState("");
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState("");
-  const [tab,setTab]=useState("veille");
-  const [live,setLive]=useState(false);
+  const [allItems, setAllItems] = useState([]);
+  const [filter, setFilter]     = useState("all");
+  const [text, setText]         = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
+  const [tab, setTab]           = useState("veille");
+  const [live, setLive]         = useState(false);
 
   useEffect(()=>{
     fetch("https://raw.githubusercontent.com/mgosnat/regulatory-watch/master/reports/latest.json")
       .then(r=>r.json())
-      .then(data=>{if(data.items?.length){setItems(data.items);setLive(true);}})
+      .then(data=>{if(data.items?.length){setAllItems(data.items);setLive(true);}})
       .catch(()=>{});
   },[]);
 
-  async function analyze(){
+  const items = filter === "all" ? allItems : allItems.filter(i => i.niveau === filter);
+
+  async function analyze() {
     if(!text.trim())return;
     setLoading(true);setError("");
     const prompt=`Tu es un expert en affaires reglementaires pharmaceutiques. Analyse ce document et reponds UNIQUEMENT avec un objet JSON valide sans Markdown. Structure: {"titre":"","niveau":"critique|important|info","domaine":"ANSM|DGS|EMA|CNAM|arXiv|autre","resume":"","impact_metier":"","echeances":[],"actions_requises":[],"mots_cles":[],"pertinence_ia":false,"pertinence_eu_ai_act":false} Document: ${text.slice(0,3000)}`;
@@ -82,8 +108,8 @@ export default function App() {
       if(raw.startsWith("```")){raw=raw.split("```")[1]||raw;if(raw.startsWith("json"))raw=raw.slice(4).trim();}
       const parsed=JSON.parse(raw);
       parsed.date=new Date().toISOString().slice(0,10);
-      setItems(prev=>[{...parsed,_new:true},...prev]);
-      setText("");setTab("veille");
+      setAllItems(prev=>[{...parsed},...prev]);
+      setText("");setTab("veille");setFilter("all");
     }catch(e){setError("Erreur : "+(e.message||"reponse inattendue"));}
     finally{setLoading(false);}
   }
@@ -102,20 +128,30 @@ export default function App() {
           <div style={{fontSize:11,opacity:.5}}>{live?"live":"demo"} - Claude API</div>
         </div>
       </div>
+
       <div style={{display:"flex",gap:4,marginBottom:18,borderBottom:"1px solid #e2e8f0"}}>
         {[["veille","Tableau de bord"],["analyze","Analyser un document"]].map(([k,l])=>(
           <button key={k} onClick={()=>setTab(k)} style={{fontSize:13,padding:"8px 16px",border:"none",cursor:"pointer",borderRadius:"6px 6px 0 0",background:tab===k?"#fff":"transparent",color:tab===k?"#0f172a":"#64748b",fontWeight:tab===k?600:400,borderBottom:tab===k?"2px solid #2563eb":"2px solid transparent",marginBottom:-1}}>{l}</button>
         ))}
       </div>
+
       {tab==="veille"&&<>
-        <SummaryBar items={items}/>
-        {["critique","important","info"].map(niv=>{const group=grouped[niv];if(!group.length)return null;const m=NIVEAU_META[niv];return(
-          <div key={niv}>
-            <div style={{fontSize:12,fontWeight:600,color:m.color,textTransform:"uppercase",letterSpacing:".06em",marginBottom:8}}>{m.label} ({group.length})</div>
-            {group.map((item,i)=><Card key={i} item={item}/>)}
-          </div>
-        );})}
+        <SummaryBar items={allItems}/>
+        <FilterBar active={filter} onChange={setFilter} items={allItems}/>
+        {items.length===0&&<p style={{fontSize:13,color:"#94a3b8",textAlign:"center",padding:"40px 0"}}>Aucun article pour ce filtre.</p>}
+        {["critique","important","info"].map(niv=>{
+          const group=grouped[niv];
+          if(!group.length)return null;
+          const m=NIVEAU_META[niv];
+          return(
+            <div key={niv}>
+              <div style={{fontSize:12,fontWeight:600,color:m.color,textTransform:"uppercase",letterSpacing:".06em",marginBottom:8}}>{m.label} ({group.length})</div>
+              {group.map((item,i)=><Card key={i} item={item}/>)}
+            </div>
+          );
+        })}
       </>}
+
       {tab==="analyze"&&<div>
         <p style={{fontSize:13,color:"#64748b",marginBottom:14}}>Colle un extrait reglementaire pour obtenir une classification automatique.</p>
         <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Colle ici un extrait reglementaire..." rows={10} style={{width:"100%",fontSize:13,padding:"12px 14px",borderRadius:8,resize:"vertical",border:"1px solid #e2e8f0",background:"#fff",color:"#0f172a",fontFamily:"inherit",lineHeight:1.6}}/>
