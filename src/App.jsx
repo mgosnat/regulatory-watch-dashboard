@@ -199,7 +199,7 @@ export default function App() {
     setLoading(true);setError("");
     const prompt=`Tu es un expert en affaires reglementaires pharmaceutiques. Analyse ce document et reponds UNIQUEMENT avec un objet JSON valide sans Markdown. Structure: {"titre":"","niveau":"critique|important|info","domaine":"ANSM|DGS|EMA|CNAM|arXiv|autre","resume":"","impact_metier":"","echeances":[],"actions_requises":[],"mots_cles":[],"pertinence_ia":false,"pertinence_eu_ai_act":false} Document: ${text.slice(0,3000)}`;
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+      const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
       const data=await res.json();
       let raw=data.content?.[0]?.text?.trim()||"";
       if(raw.startsWith("```")){raw=raw.split("```")[1]||raw;if(raw.startsWith("json"))raw=raw.slice(4).trim();}
